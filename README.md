@@ -14,7 +14,7 @@ mysite/includes/languages/english/modules/payment/cashnet.php
 5. Add the following lines to mysite/includes/database_tables.php
 `define('TABLE_CASHNET', DB_PREFIX . 'cashnet');
 define('TABLE_CASHNET_SESSION', DB_PREFIX . 'cashnet_session');`
-6. Modify your CashNet settings in mysite/includes/languages/english/modules/payment/cashnet.php 
 7. Sign in to your ZenCart admin
 8. To install, click Modules->Payment->CashNet->Install
+9. Enter YOUR CashNet settings
 9. To enable, click edit->true->update
