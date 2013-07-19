@@ -62,7 +62,7 @@ class cashnet extends base {
 
     if (is_object($order)) $this->update_status();
 
-    $this->form_action_url = MODULE_PAYMENT_CASHNET_CONFIG_URL;
+    $this->form_action_url = $this->getCashNetUrl();
   }
 
   /**
@@ -152,8 +152,8 @@ class cashnet extends base {
 
     $db->Execute($sql);
 
-    $key = MODULE_PAYMENT_CASHNET_CONFIG_KEY;
-    $itemcode = MODULE_PAYMENT_CASHNET_CONFIG_ITEMCODE;
+    $key = $this->getCashNetKey();
+    $itemcode = $this->getCashNetItemCode();
 
     $this->transaction_currency = $_SESSION['currency'];
     $this->totalsum = $order->info['total'] = number_format($order->info['total'], 2);
@@ -322,6 +322,45 @@ class cashnet extends base {
     return $this->_check;
   }
 
+/**
+ * Get the CashNet URL from the configuration table
+ *
+ * @return url string
+ */
+  function getCashNetUrl() {
+    global $db;
+
+    $url_query = $db->Execute("select configuration_value from " . TABLE_CONFIGURATION . " where configuration_key = 'MODULE_PAYMENT_CASHNET_CONFIG_URL'");
+
+    return $url_query->fields[configuration_value];
+  }
+
+/**
+ * Get the CashNet key from the configuration table
+ *
+ * @return key string
+ */
+  function getCashNetKey() {
+    global $db;
+
+    $key_query = $db->Execute("select configuration_value from " . TABLE_CONFIGURATION . " where configuration_key = 'MODULE_PAYMENT_CASHNET_CONFIG_KEY'");
+
+    return $key_query->fields[configuration_value];
+  }
+
+/**
+ * Get the CashNet item code from the configuration table
+ *
+ * @return item code string
+ */
+  function getCashNetItemCode() {
+    global $db;
+
+    $code_query = $db->Execute("select configuration_value from " . TABLE_CONFIGURATION . " where configuration_key = 'MODULE_PAYMENT_CASHNET_CONFIG_ITEMCODE'");
+
+    return $code_query->fields[configuration_value];
+  }
+
   /**
    * Install the payment module and its configuration settings
     *
@@ -334,8 +373,12 @@ class cashnet extends base {
       return 'failed';
     }
 
-    $db->Execute("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable Cashnet Module', 'MODULE_PAYMENT_CASHNET_STATUS', 'True', 'Do you want to accept CashNet payments?', '6', '0', 'zen_cfg_select_option(array(\'True\', \'False\'), ', now())");
-    $db->Execute("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Sort order of display.', 'MODULE_PAYMENT_CASHNET_SORT_ORDER', '0', 'Sort order of display. Lowest is displayed first.', '6', '8', now())");
+    $db->Execute("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) values ('Enable Cashnet Module', 'MODULE_PAYMENT_CASHNET_STATUS', 'True', 'Do you want to accept CashNet payments?', '61', '0', 'zen_cfg_select_option(array(\'True\', \'False\'), ', now())");
+    $db->Execute("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('Sort order of display.', 'MODULE_PAYMENT_CASHNET_SORT_ORDER', '0', 'Sort order of display. Lowest is displayed first.', '61', '8', now())");
+    $db->Execute("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('CashNet URL', 'MODULE_PAYMENT_CASHNET_CONFIG_URL', 'http://[YOUR_CASHNET_URL]', '', '61', '7', now())");
+    $db->Execute("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('CashNet Key', 'MODULE_PAYMENT_CASHNET_CONFIG_KEY', '[CASHNETKEY]', '', '61', '6', now())");
+    $db->Execute("insert into " . TABLE_CONFIGURATION . " (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) values ('CashNet Item Code', 'MODULE_PAYMENT_CASHNET_CONFIG_ITEMCODE', '[CASHNETITEMCODE]', '', '61', '5', now())");
+    
     $this->notify('NOTIFY_PAYMENT_CASHNET_INSTALLED');
   }
 
@@ -357,7 +400,10 @@ class cashnet extends base {
   function keys() {
     $keys_list = array(
                        'MODULE_PAYMENT_CASHNET_STATUS',
-                       'MODULE_PAYMENT_CASHNET_SORT_ORDER'
+                       'MODULE_PAYMENT_CASHNET_SORT_ORDER',
+                       'MODULE_PAYMENT_CASHNET_CONFIG_URL',
+                       'MODULE_PAYMENT_CASHNET_CONFIG_KEY',
+                       'MODULE_PAYMENT_CASHNET_CONFIG_ITEMCODE'
                         );
 
     // CashNet testing/debug options go here:
